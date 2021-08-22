@@ -79,12 +79,12 @@ async function main() {
         }
         const workflow_jobs = await Promise.all(
           workflow_runs.map(async ({ id, jobs_url }) => {
-            const jobs = await octokit.request(`GET ${jobs_url}`, {
+            const { data: jobs } = await octokit.request(`GET ${jobs_url}`, {
               owner,
               repo,
               run_id: id,
             });
-            return { workflow_run_id: id, jobs: JSON.stringify(jobs) };
+            return { workflow_run_id: id, jobs };
           }),
         );
 
