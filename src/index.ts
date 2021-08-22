@@ -32,10 +32,15 @@ async function main() {
   console.log({ eventName, sha, headSha, branch, owner, repo, GITHUB_RUN_ID });
   const token = core.getInput('access_token', { required: true });
   const workflow_id = core.getInput('workflow_id', { required: false });
-  const disqualifying_jobs = core.getInput('disqualifying_jobs', { required: false });
+  const disqualifying_jobs = JSON.parse(core.getInput('disqualifying_jobs', { required: false }));
   const ignore_sha = core.getBooleanInput('ignore_sha', { required: false });
   const all_but_latest = core.getBooleanInput('all_but_latest', { required: false });
   console.log(`Found token: ${token ? 'yes' : 'no'}`);
+  console.log(
+    disqualifying_jobs
+      ? `Skipping cancel if job in ${disqualifying_jobs}`
+      : 'No disqualifying jobs',
+  );
   const workflow_ids: string[] = [];
   const octokit = github.getOctokit(token);
 

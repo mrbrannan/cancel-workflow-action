@@ -6104,10 +6104,13 @@ async function main() {
     console.log({ eventName, sha, headSha, branch, owner, repo, GITHUB_RUN_ID });
     const token = _actions_core__WEBPACK_IMPORTED_MODULE_0__.getInput('access_token', { required: true });
     const workflow_id = _actions_core__WEBPACK_IMPORTED_MODULE_0__.getInput('workflow_id', { required: false });
-    const disqualifying_jobs = _actions_core__WEBPACK_IMPORTED_MODULE_0__.getInput('disqualifying_jobs', { required: false });
+    const disqualifying_jobs = JSON.parse(_actions_core__WEBPACK_IMPORTED_MODULE_0__.getInput('disqualifying_jobs', { required: false }));
     const ignore_sha = _actions_core__WEBPACK_IMPORTED_MODULE_0__.getBooleanInput('ignore_sha', { required: false });
     const all_but_latest = _actions_core__WEBPACK_IMPORTED_MODULE_0__.getBooleanInput('all_but_latest', { required: false });
     console.log(`Found token: ${token ? 'yes' : 'no'}`);
+    console.log(disqualifying_jobs
+        ? `Skipping cancel if job in ${disqualifying_jobs}`
+        : 'No disqualifying jobs');
     const workflow_ids = [];
     const octokit = _actions_github__WEBPACK_IMPORTED_MODULE_1__.getOctokit(token);
     const { data: current_run } = await octokit.actions.getWorkflowRun({
