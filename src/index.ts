@@ -90,7 +90,7 @@ async function main() {
         }
 
         const workflow_jobs = (
-          disqualifying_jobs.length > 0
+          disqualifying_jobs && disqualifying_jobs.length > 0
             ? await Promise.all(
                 workflow_runs.map(async ({ id, jobs_url }) => {
                   const {

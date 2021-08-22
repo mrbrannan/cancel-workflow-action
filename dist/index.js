@@ -6150,7 +6150,7 @@ async function main() {
             if (disqualifying_jobs && !Array.isArray(disqualifying_jobs)) {
                 _actions_core__WEBPACK_IMPORTED_MODULE_0__.setFailed('Disqualifying jobs found but is not array');
             }
-            const workflow_jobs = (disqualifying_jobs.length > 0
+            const workflow_jobs = (disqualifying_jobs && disqualifying_jobs.length > 0
                 ? await Promise.all(workflow_runs.map(async ({ id, jobs_url }) => {
                     const { data: { jobs }, } = await octokit.request(`GET ${jobs_url}`, {
                         owner,
