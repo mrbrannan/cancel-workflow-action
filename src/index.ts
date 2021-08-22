@@ -86,7 +86,7 @@ async function main() {
               repo,
               run_id: id,
             });
-            return { workflow_run_id: id, jobs };
+            return { workflow_run_id: id, jobs: JSON.stringify(jobs) };
           }),
         );
 
