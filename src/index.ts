@@ -111,7 +111,7 @@ async function main() {
             : []
         ).filter(workflow => workflow.jobs.length > 0);
 
-        if (disqualifying_jobs) {
+        if (workflow_jobs.length) {
           console.log('Found disqualifying jobs running, skipping cancel', workflow_jobs);
           workflow_runs.length = 0;
         }
