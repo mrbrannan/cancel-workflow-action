@@ -84,7 +84,7 @@ async function main() {
               repo,
               run_id: id,
             });
-            return { workflow_run_id: id, jobs: (jobs as any).map((job: any) => job.data) };
+            return { workflow_run_id: id, jobs: JSON.stringify(jobs) };
           }),
         );
 
