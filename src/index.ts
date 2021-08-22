@@ -32,7 +32,7 @@ async function main() {
   console.log({ eventName, sha, headSha, branch, owner, repo, GITHUB_RUN_ID });
   const token = core.getInput('access_token', { required: true });
   const workflow_id = core.getInput('workflow_id', { required: false });
-  const disqualifying_jobs = JSON.parse(core.getInput('disqualifying_jobs', { required: false }));
+  const disqualifying_jobs = core.getInput('disqualifying_jobs', { required: false });
   const ignore_sha = core.getBooleanInput('ignore_sha', { required: false });
   const all_but_latest = core.getBooleanInput('all_but_latest', { required: false });
   console.log(`Found token: ${token ? 'yes' : 'no'}`);
@@ -88,7 +88,7 @@ async function main() {
           core.setFailed('Disqualifying jobs found but is not array');
         }
 
-        const workflow_jobs =
+        const workflow_jobs = (
           disqualifying_jobs.length > 0
             ? await Promise.all(
                 workflow_runs.map(async ({ id, jobs_url }) => {
@@ -108,9 +108,12 @@ async function main() {
                   };
                 }),
               )
-            : [];
+            : []
+        ).filter(workflow => workflow.jobs.length > 0);
 
-        console.log(workflow_jobs);
+        if (disqualifying_jobs) {
+          console.log('Found disqualifying jobs running', workflow_jobs);
+        }
 
         const runningWorkflows = workflow_runs.filter(
           run =>
