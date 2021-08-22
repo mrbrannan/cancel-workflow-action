@@ -32,6 +32,7 @@ async function main() {
   console.log({ eventName, sha, headSha, branch, owner, repo, GITHUB_RUN_ID });
   const token = core.getInput('access_token', { required: true });
   const workflow_id = core.getInput('workflow_id', { required: false });
+  const disqualifying_jobs = core.getInput('disqualifying_jobs', { required: false });
   const ignore_sha = core.getBooleanInput('ignore_sha', { required: false });
   const all_but_latest = core.getBooleanInput('all_but_latest', { required: false });
   console.log(`Found token: ${token ? 'yes' : 'no'}`);
@@ -77,18 +78,31 @@ async function main() {
             .reduce((a, b) => Math.max(a, b), cancelBefore.getTime());
           cancelBefore = new Date(n);
         }
-        const workflow_jobs = await Promise.all(
-          workflow_runs.map(async ({ id, jobs_url }) => {
-            const {
-              data: { jobs },
-            } = await octokit.request(`GET ${jobs_url}`, {
-              owner,
-              repo,
-              run_id: id,
-            });
-            return { workflow_run_id: id, jobs: JSON.stringify(jobs) };
-          }),
-        );
+
+        if (disqualifying_jobs && !Array.isArray(disqualifying_jobs)) {
+          core.setFailed('Disqualifying jobs found but is not array');
+        }
+
+        const workflow_jobs = disqualifying_jobs.length
+          ? await Promise.all(
+              workflow_runs.map(async ({ id, jobs_url }) => {
+                const {
+                  data: { jobs },
+                } = await octokit.request(`GET ${jobs_url}`, {
+                  owner,
+                  repo,
+                  run_id: id,
+                });
+                return {
+                  workflow_run_id: id,
+                  jobs: jobs.filter(
+                    ({ status, name }: any) =>
+                      status === 'in_progress' && disqualifying_jobs.includes(name),
+                  ),
+                };
+              }),
+            )
+          : [];
 
         console.log(workflow_jobs);
 

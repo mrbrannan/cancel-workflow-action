@@ -6104,6 +6104,7 @@ async function main() {
     console.log({ eventName, sha, headSha, branch, owner, repo, GITHUB_RUN_ID });
     const token = _actions_core__WEBPACK_IMPORTED_MODULE_0__.getInput('access_token', { required: true });
     const workflow_id = _actions_core__WEBPACK_IMPORTED_MODULE_0__.getInput('workflow_id', { required: false });
+    const disqualifying_jobs = _actions_core__WEBPACK_IMPORTED_MODULE_0__.getInput('disqualifying_jobs', { required: false });
     const ignore_sha = _actions_core__WEBPACK_IMPORTED_MODULE_0__.getBooleanInput('ignore_sha', { required: false });
     const all_but_latest = _actions_core__WEBPACK_IMPORTED_MODULE_0__.getBooleanInput('all_but_latest', { required: false });
     console.log(`Found token: ${token ? 'yes' : 'no'}`);
@@ -6142,14 +6143,22 @@ async function main() {
                     .reduce((a, b) => Math.max(a, b), cancelBefore.getTime());
                 cancelBefore = new Date(n);
             }
-            const workflow_jobs = await Promise.all(workflow_runs.map(async ({ id, jobs_url }) => {
-                const { data: { jobs }, } = await octokit.request(`GET ${jobs_url}`, {
-                    owner,
-                    repo,
-                    run_id: id,
-                });
-                return { workflow_run_id: id, jobs: JSON.stringify(jobs) };
-            }));
+            if (disqualifying_jobs && !Array.isArray(disqualifying_jobs)) {
+                _actions_core__WEBPACK_IMPORTED_MODULE_0__.setFailed('Disqualifying jobs found but is not array');
+            }
+            const workflow_jobs = disqualifying_jobs.length
+                ? await Promise.all(workflow_runs.map(async ({ id, jobs_url }) => {
+                    const { data: { jobs }, } = await octokit.request(`GET ${jobs_url}`, {
+                        owner,
+                        repo,
+                        run_id: id,
+                    });
+                    return {
+                        workflow_run_id: id,
+                        jobs: jobs.filter(({ status, name }) => status === 'in_progress' && disqualifying_jobs.includes(name)),
+                    };
+                }))
+                : [];
             console.log(workflow_jobs);
             const runningWorkflows = workflow_runs.filter(run => run.head_repository.id === trigger_repo_id &&
                 run.id !== current_run.id &&
