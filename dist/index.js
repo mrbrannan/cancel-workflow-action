@@ -6104,7 +6104,7 @@ async function main() {
     console.log({ eventName, sha, headSha, branch, owner, repo, GITHUB_RUN_ID });
     const token = _actions_core__WEBPACK_IMPORTED_MODULE_0__.getInput('access_token', { required: true });
     const workflow_id = _actions_core__WEBPACK_IMPORTED_MODULE_0__.getInput('workflow_id', { required: false });
-    const disqualifying_jobs = _actions_core__WEBPACK_IMPORTED_MODULE_0__.getInput('disqualifying_jobs', { required: false });
+    const disqualifying_jobs = JSON.parse(_actions_core__WEBPACK_IMPORTED_MODULE_0__.getInput('disqualifying_jobs', { required: false }));
     const ignore_sha = _actions_core__WEBPACK_IMPORTED_MODULE_0__.getBooleanInput('ignore_sha', { required: false });
     const all_but_latest = _actions_core__WEBPACK_IMPORTED_MODULE_0__.getBooleanInput('all_but_latest', { required: false });
     console.log(`Found token: ${token ? 'yes' : 'no'}`);
@@ -6163,7 +6163,8 @@ async function main() {
                 }))
                 : []).filter(workflow => workflow.jobs.length > 0);
             if (disqualifying_jobs) {
-                console.log('Found disqualifying jobs running', workflow_jobs);
+                console.log('Found disqualifying jobs running, skipping cancel', workflow_jobs);
+                workflow_runs.length = 0;
             }
             const runningWorkflows = workflow_runs.filter(run => run.head_repository.id === trigger_repo_id &&
                 run.id !== current_run.id &&
