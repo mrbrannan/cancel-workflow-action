@@ -32,7 +32,8 @@ async function main() {
   console.log({ eventName, sha, headSha, branch, owner, repo, GITHUB_RUN_ID });
   const token = core.getInput('access_token', { required: true });
   const workflow_id = core.getInput('workflow_id', { required: false });
-  const disqualifying_jobs = JSON.parse(core.getInput('disqualifying_jobs', { required: false }));
+  const disqualifying_jobs_input = core.getInput('disqualifying_jobs', { required: false });
+  const disqualifying_jobs = disqualifying_jobs_input ? JSON.parse(disqualifying_jobs_input) : null;
   const ignore_sha = core.getBooleanInput('ignore_sha', { required: false });
   const all_but_latest = core.getBooleanInput('all_but_latest', { required: false });
   console.log(`Found token: ${token ? 'yes' : 'no'}`);
