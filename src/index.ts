@@ -83,26 +83,27 @@ async function main() {
           core.setFailed('Disqualifying jobs found but is not array');
         }
 
-        const workflow_jobs = disqualifying_jobs.length
-          ? await Promise.all(
-              workflow_runs.map(async ({ id, jobs_url }) => {
-                const {
-                  data: { jobs },
-                } = await octokit.request(`GET ${jobs_url}`, {
-                  owner,
-                  repo,
-                  run_id: id,
-                });
-                return {
-                  workflow_run_id: id,
-                  jobs: jobs.filter(
-                    ({ status, name }: any) =>
-                      status === 'in_progress' && disqualifying_jobs.includes(name),
-                  ),
-                };
-              }),
-            )
-          : [];
+        const workflow_jobs =
+          disqualifying_jobs.length > 0
+            ? await Promise.all(
+                workflow_runs.map(async ({ id, jobs_url }) => {
+                  const {
+                    data: { jobs },
+                  } = await octokit.request(`GET ${jobs_url}`, {
+                    owner,
+                    repo,
+                    run_id: id,
+                  });
+                  return {
+                    workflow_run_id: id,
+                    jobs: jobs.filter(
+                      ({ status, name }: any) =>
+                        status === 'in_progress' && disqualifying_jobs.includes(name),
+                    ),
+                  };
+                }),
+              )
+            : [];
 
         console.log(workflow_jobs);
 
