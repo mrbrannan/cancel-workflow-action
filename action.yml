@@ -21,7 +21,7 @@ inputs:
     required: false
     default: 'false'
   disqualifying_jobs:
-    description: "Named jobs that will stop cancellation if in progress. Usefull for jobs like deployments where cancellation could risk downtime."
+    description: "A JSON array of named jobs that will stop cancellation if in progress. Usefull for jobs like deployments where cancellation could risk downtime."
     required: false
 runs:
   using: 'node12'
